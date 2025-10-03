@@ -16,10 +16,10 @@ A REST API for managing a music/sound collection with metadata, tags, and search
 - **Win:** You can run `flask --version` and `psql --version`
 
 ### Day 2 (Tuesday): Database Design
-- [ ] Design schema on paper (tracks table: id, title, artist, duration, file_path, created_at)
-- [ ] Create database in PostgreSQL
-- [ ] Write SQLAlchemy models in `models.py`
-- [ ] Test connection - create one track manually in Python shell
+- [x] Design schema on paper (tracks table: id, title, artist, duration, file_path, created_at)
+- [x] Create database in PostgreSQL
+- [x] Write SQLAlchemy models in `models.py`
+- [x] Test connection - create one track manually in Python shell
 - **Win:** You successfully inserted and queried a track from Python
 
 ### Day 3 (Wednesday): First Endpoint
