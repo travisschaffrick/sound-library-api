@@ -18,6 +18,21 @@ app = Flask(__name__)
 def handle_tracks():
     if request.method == 'POST':
         data = request.get_json()
+        # Input validation
+        if 'title' not in data or not data['title']:
+            return jsonify({"error": "No title"}), 400
+        
+        if 'artist_name' not in data or not data['artist_name']:
+            return jsonify({"error": "No artist name"}), 400
+        
+        if 'duration_seconds' not in data:
+            return jsonify({"error": "Duration is required"}), 400
+        # Check type and value
+        if not isinstance(data['duration_seconds'], int) or data['duration_seconds'] <= 0:
+            return jsonify({"error": "Duration must be a positive integer"}), 400
+
+        if 'file_path' not in data or not data['file_path']:
+            return jsonify({"error": "No file path"}), 400
 
         with Session(engine) as session:
             track = Track(
@@ -62,6 +77,7 @@ def handle_tracks():
     
 @app.route('/api/tracks/<id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_track_by_id(id):
+    # GET
     if request.method == 'GET':
         with Session(engine) as session:
             # get track
@@ -81,7 +97,7 @@ def handle_track_by_id(id):
                 'file_path': track.file_path}
             return jsonify(tracks_list), 200
         
-
+    # PUT
     if request.method == 'PUT':
         data = request.get_json()
 
@@ -95,13 +111,14 @@ def handle_track_by_id(id):
                 return jsonify({"error": "Track not found"}), 404
             
             # update only what is given
-            if 'title' in data:
+            if 'title' in data and data['title']:
                 track.title = data['title']
-            if 'artist_name' in data:
+            if 'artist_name' in data and data['artist_name']:
                 track.artist_name = data['artist_name']
-            if 'duration_seconds' in data:
+            if 'duration_seconds' in data and isinstance(data['duration_seconds'], int) \
+                and data['duration_seconds'] > 0:
                 track.duration_seconds = data['duration_seconds']
-            if 'file_path' in data:
+            if 'file_path' in data and data['file_path']:
                 track.file_path = data['file_path']
 
             session.commit()
@@ -114,7 +131,8 @@ def handle_track_by_id(id):
                 'duration_seconds': track.duration_seconds,
                 'file_path': track.file_path
             }), 200
-        
+    
+    # DELETE
     if request.method == 'DELETE':
         with Session(engine) as session:
             # get track

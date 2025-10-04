@@ -25,3 +25,15 @@ This is a day by day progession of my project detailing the main things I did fr
 * psql was not a recognized command, had to PostgreSQL bin folder to PATH.
 * Initially got "relation tracks does not exist", forgot to call create_all() before querying.
 
+## Day 2
+**Did**
+* Implemented CRUD requests for tracks
+* Implemented input validation
+* Started writing README
+**Learnt**
+* How to get information from a curl url
+* Basic format for SQLAlchemy CRUD requests
+**Challenges**
+* Remembering what one is post and what one is get HAHA
+* Tried to declare functions with duplicate decorators, refactored to do them in the same function
+
