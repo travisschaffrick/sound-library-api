@@ -20,19 +20,19 @@ def handle_tracks():
         data = request.get_json()
         # Input validation
         if 'title' not in data or not data['title']:
-            return jsonify({"error": "No title"}), 400
+            return jsonify({"Error": "No title"}), 400
         
         if 'artist_name' not in data or not data['artist_name']:
-            return jsonify({"error": "No artist name"}), 400
+            return jsonify({"Error": "No artist name"}), 400
         
         if 'duration_seconds' not in data:
-            return jsonify({"error": "Duration is required"}), 400
+            return jsonify({"Error": "Duration is required"}), 400
         # Check type and value
         if not isinstance(data['duration_seconds'], int) or data['duration_seconds'] <= 0:
-            return jsonify({"error": "Duration must be a positive integer"}), 400
+            return jsonify({"Error": "Duration must be a positive integer"}), 400
 
         if 'file_path' not in data or not data['file_path']:
-            return jsonify({"error": "No file path"}), 400
+            return jsonify({"Error": "No file path"}), 400
 
         with Session(engine) as session:
             track = Track(
@@ -86,7 +86,7 @@ def handle_track_by_id(id):
             track = result.scalar_one_or_none()
 
             if not track:
-                return jsonify({"error": "Track not found"}), 404
+                return jsonify({"Error": "Track not found"}), 404
             
             # Convert to dictionary
             tracks_list = {
@@ -108,7 +108,7 @@ def handle_track_by_id(id):
             track = result.scalar_one_or_none()
 
             if not track:
-                return jsonify({"error": "Track not found"}), 404
+                return jsonify({"Error": "Track not found"}), 404
             
             # update only what is given
             if 'title' in data and data['title']:
@@ -142,9 +142,9 @@ def handle_track_by_id(id):
             if track:
                 session.delete(track)
                 session.commit()
-                return jsonify(f"Track {id}: {track.title} deleted"), 200
+                return jsonify({"Success": f"Track {id}: {track.title} deleted"}), 200
             else:
-                return jsonify("Track not found"), 404
+                return jsonify({"Error": "Track not found"}), 404
         
         
     return jsonify("Invalid request"), 400

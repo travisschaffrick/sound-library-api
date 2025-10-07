@@ -70,7 +70,7 @@ A REST API for managing audio files and their metadata. Supports creating, readi
 
 ### Endpoints
 
-#### 1. Create a Track
+#### 1. Create a track
 **POST** `/api/tracks`
 
 Creates a new track in the database.
@@ -80,7 +80,7 @@ Creates a new track in the database.
 {
   "title": "Song Name",
   "artist_name": "Artist Name",
-  "duration_seconds": 180,
+  "duration_seconds": 240,
   "file_path": "/path/to/file.mp3"
 }
 ```
@@ -91,7 +91,7 @@ curl -X POST http://localhost:5000/api/tracks \
   -d '{"title":"Beware","artist_name":"Death Grips","duration_seconds":352,"file_path":"/music/beware.mp3"}'
 ```
 **Response: `201 Created`**
-```bash
+```json
 {
   "id": 1,
   "title": "Beware",
@@ -101,6 +101,113 @@ curl -X POST http://localhost:5000/api/tracks \
 }
 ```
 
+#### 2. Edit a track
+**PUT** `/api/tracks/:id`
+
+Edits a track in the database.
+
+**Example:**
+```bash
+curl -X PUT http://localhost:5000/api/tracks/1 \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Known for it", "file_path": "/music/knownforit.mp3", "duration_seconds": 253}'
+```
+**Response: `200 Success`**
+```json
+{
+  "id": 1,
+  "title": "Known for it",
+  "artist_name": "Death Grips",
+  "duration_seconds": 253, 
+  "file_path": "/music/knownforit.mp3"
+}
+```
+**Response: `404 Error`**
+```json
+{
+  "Error": "Track not found"
+}
+```
+
+#### 3. Delete a track
+**DELETE** `/api/tracks/:id`
+
+Delete a track in the database.
+
+**Example:**
+```bash
+curl -X DELETE http://localhost:5000/api/tracks/1 \
+  -H "Content-Type: application/json" \
+```
+**Response: `200 Success`**
+```json
+{
+  "Success": "Track 1: Known for it deleted"
+}
+```
+**Response: `404 Error`**
+```json
+{
+  "Error": "Track not found"
+}
+```
+
+#### 4. Get a track
+**GET** `/api/tracks/:id`
+
+Get a track from the database.
+
+**Example:**
+```bash
+curl -X GET http://localhost:5000/api/tracks/1 \
+  -H "Content-Type: application/json" \
+```
+**Response: `200 Success`**
+```json
+{
+  "id": 1,
+  "title": "Known for it",
+  "artist_name": "Death Grips",
+  "duration_seconds": 352, 
+  "file_path": "/music/knownforit.mp3"
+}
+```
+**Response: `404 Error`**
+```json
+{
+  "Error": "Track not found"
+}
+```
+
+#### 5. Get all tracks
+**GET** `/api/tracks`
+
+Get all tracks from the database.
+
+**Example:**
+```bash
+curl -X GET http://localhost:5000/api/tracks \
+  -H "Content-Type: application/json" \
+```
+**Response: `200 Success`**
+```json
+[
+    {
+        "id": 1,
+        "title": "Known for it",
+        "artist_name": "Death Grips",
+        "duration_seconds": 352, 
+        "file_path": "/music/knownforit.mp3"
+    },
+    {
+        "id": 2,
+        "title": "Get Got",
+        "artist_name": "Death Grips",
+        "duration_seconds": 191, 
+        "file_path": "/music/getgot.mp3"
+    }
+]
+```
 
 
 _Project in progress - building this to learn production-level backend development._
