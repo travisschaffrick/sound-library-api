@@ -37,3 +37,10 @@ This is a day by day progession of my project detailing the main things I did fr
 * Remembering what one is post and what one is get HAHA
 * Tried to declare functions with duplicate decorators, refactored to do them in the same function
 
+## Day 3 (Took a few days off between)
+**Did**
+* README Done
+* Implemented tag functionality
+**Learnt**
+* How to use many to many relationships in SQLAlchemy
+

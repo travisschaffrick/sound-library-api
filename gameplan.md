@@ -41,10 +41,10 @@ A REST API for managing a music/sound collection with metadata, tags, and search
 - **Win:** Full CRUD functionality working! You built a real API!
 
 ### Weekend 1 (Saturday): Clean Up & Docs
-- [ ] Add input validation (required fields, data types)
-- [ ] Write a clear README with API documentation
-- [ ] Add example curl commands
-- [ ] Commit and push everything
+- [x] Add input validation (required fields, data types)
+- [x] Write a clear README with API documentation
+- [x] Add example curl commands
+- [x] Commit and push everything
 - **Win:** Your repo looks professional with good documentation
 
 ### Weekend 1 (Sunday): Rest or Catch Up
@@ -57,9 +57,9 @@ A REST API for managing a music/sound collection with metadata, tags, and search
 
 ### Milestone 6: Tags Integration (Part 1)
 **Target: Day 6-7**
-- [ ] Add tags to POST endpoint (can create track with tags)
-- [ ] Add tags to GET endpoints (tracks return their tags)
-- [ ] Update PUT endpoint to modify tags
+- [x] Add tags to POST endpoint (can create track with tags)
+- [x] Add tags to GET endpoints (tracks return their tags)
+- [x] Update PUT endpoint to modify tags
 - **Win:** Your API handles complex many-to-many relationships
 
 ### Milestone 7: Search & Pagination

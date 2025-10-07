@@ -33,13 +33,27 @@ def handle_tracks():
 
         if 'file_path' not in data or not data['file_path']:
             return jsonify({"Error": "No file path"}), 400
+        
+        song_tags = []
 
         with Session(engine) as session:
+            if 'tags' in data:
+                tag_names = data['tags']
+                for tag_name in tag_names:
+                    existing_tag = session.query(Tag).filter(Tag.name == tag_name).first()
+
+                    if existing_tag:
+                        song_tags.append(existing_tag)
+                    else:
+                        new_tag = Tag(name=tag_name)
+                        song_tags.append(new_tag)
+
             track = Track(
                 title = data['title'],
                 artist_name = data['artist_name'],
                 duration_seconds = data['duration_seconds'],
-                file_path = data['file_path']
+                file_path = data['file_path'],
+                tags = song_tags
             )
 
             session.add(track)
@@ -51,7 +65,8 @@ def handle_tracks():
                 'title': track.title,
                 'artist_name': track.artist_name,
                 'duration_seconds': track.duration_seconds,
-                'file_path': track.file_path
+                'file_path': track.file_path,
+                'tags': [tag.name for tag in track.tags]
             }), 201 #201 = Created
         
 
@@ -68,7 +83,8 @@ def handle_tracks():
                 'title': track.title,
                 'artist_name': track.artist_name,
                 'duration_seconds': track.duration_seconds,
-                'file_path': track.file_path
+                'file_path': track.file_path,
+                'tags': [tag.name for tag in track.tags]
             } for track in tracks]
             return jsonify(tracks_list), 200
     
@@ -94,7 +110,8 @@ def handle_track_by_id(id):
                 'title': track.title,
                 'artist_name': track.artist_name,
                 'duration_seconds': track.duration_seconds,
-                'file_path': track.file_path}
+                'file_path': track.file_path,
+                'tags': [tag.name for tag in track.tags]}
             return jsonify(tracks_list), 200
         
     # PUT
@@ -121,6 +138,19 @@ def handle_track_by_id(id):
             if 'file_path' in data and data['file_path']:
                 track.file_path = data['file_path']
 
+            if 'tags' in data:
+                song_tags = []
+                tag_names = data['tags']
+                for tag_name in tag_names:
+                    existing_tag = session.query(Tag).filter(Tag.name == tag_name).first()
+
+                    if existing_tag:
+                        song_tags.append(existing_tag)
+                    else:
+                        new_tag = Tag(name=tag_name)
+                        song_tags.append(new_tag)
+                track.tags = song_tags
+
             session.commit()
             session.refresh(track)
             
@@ -129,7 +159,8 @@ def handle_track_by_id(id):
                 'title': track.title,
                 'artist_name': track.artist_name,
                 'duration_seconds': track.duration_seconds,
-                'file_path': track.file_path
+                'file_path': track.file_path,
+                'tags': [tag.name for tag in track.tags]
             }), 200
     
     # DELETE
