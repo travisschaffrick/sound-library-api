@@ -27,6 +27,7 @@ A REST API for managing audio files and their metadata. Supports creating, readi
     1. **Install PostgreSQL** (if not already installed)
         - macOS: `brew install postgresql`
         - Ubuntu/Debian: `sudo apt-get install postgresql`
+        - Arch Linux: `sudo pacman -S postgresql`
         - Windows: Download from postgresql.org
 
     2. **Start PostgreSQL service**
@@ -110,7 +111,7 @@ Edits a track in the database.
 ```bash
 curl -X PUT http://localhost:5000/api/tracks/1 \
   -H "Content-Type: application/json" \
-  -d '{"title":"Known for it", "file_path": "/music/knownforit.mp3", "duration_seconds": 253}'
+  -d '{"title":"Known for it", "file_path": "/music/knownforit.mp3", "duration_seconds": 253, "tags": ["experimental", "hip-hop"]}'
 ```
 **Response: `200 Success`**
 ```json
@@ -119,7 +120,8 @@ curl -X PUT http://localhost:5000/api/tracks/1 \
   "title": "Known for it",
   "artist_name": "Death Grips",
   "duration_seconds": 253, 
-  "file_path": "/music/knownforit.mp3"
+  "file_path": "/music/knownforit.mp3",
+  "tags": ["experimental", "hip-hop"]
 }
 ```
 **Response: `404 Error`**
@@ -169,7 +171,8 @@ curl -X GET http://localhost:5000/api/tracks/1 \
   "title": "Known for it",
   "artist_name": "Death Grips",
   "duration_seconds": 352, 
-  "file_path": "/music/knownforit.mp3"
+  "file_path": "/music/knownforit.mp3",
+  "tags": ["experimental", "hip-hop"]
 }
 ```
 **Response: `404 Error`**
@@ -197,14 +200,16 @@ curl -X GET http://localhost:5000/api/tracks \
         "title": "Known for it",
         "artist_name": "Death Grips",
         "duration_seconds": 352, 
-        "file_path": "/music/knownforit.mp3"
+        "file_path": "/music/knownforit.mp3",
+        "tags": ["experimental", "hip-hop"]
     },
     {
         "id": 2,
         "title": "Get Got",
         "artist_name": "Death Grips",
         "duration_seconds": 191, 
-        "file_path": "/music/getgot.mp3"
+        "file_path": "/music/getgot.mp3",
+        "tags": ["experimental", "hip-hop"]
     }
 ]
 ```

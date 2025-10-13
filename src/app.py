@@ -71,9 +71,17 @@ def handle_tracks():
         
 
     elif request.method == 'GET':
+        # Get pagination parameters from query string
+        limit = request.args.get('limit', 20, type=int)  # default 20
+        offset = request.args.get('offset', 0, type=int)  # default 0
+
         with Session(engine) as session:
-            # get track
-            statement = select(Track)
+            # Get count
+            track_count = session.query(Track).count()
+
+
+            # get paginated tracks
+            statement = select(Track).limit(limit).offset(offset)
             result = session.execute(statement)
             tracks = result.scalars().all()
             
@@ -86,7 +94,14 @@ def handle_tracks():
                 'file_path': track.file_path,
                 'tags': [tag.name for tag in track.tags]
             } for track in tracks]
-            return jsonify(tracks_list), 200
+
+            # Return with pagination info
+            return jsonify({
+                'tracks': tracks_list,
+                'total': total_count,
+                'limit': limit,
+                'offset': offset
+            }), 200
     
     return jsonify("Invalid request"), 400
     
@@ -94,7 +109,7 @@ def handle_tracks():
 @app.route('/api/tracks/<id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_track_by_id(id):
     # GET
-    if request.method == 'GET':
+    if request.method == 'GET':        
         with Session(engine) as session:
             # get track
             statement = select(Track).where(Track.id == id)
@@ -179,7 +194,55 @@ def handle_track_by_id(id):
         
         
     return jsonify("Invalid request"), 400
+
+@app.route('/api/tracks/search', methods=['GET'])
+def search_tracks():
+    query = request.args.get('q', '')
+
+    if not query:
+        return jsonify({"Error": "Search query required"}), 400
+
+    # Get pagination parameters
+    limit = request.args.get('limit', 20, type=int)
+    offset = request.args.get('offset', 0, type=int)
     
+    
+    with Session(engine) as session:
+        search_pattern = f'%{query}%'
+
+        # Search using track title, artist name, and track tags
+        base_statement = select(Track).join(Track.tags).where(
+            (Track.title.ilike(search_pattern)) |
+            (Track.artist_name.ilike(search_pattern)) |
+            (Tag.name.ilike(search_pattern))
+        ).distinct()
+
+        # Get total count
+        total_count = len(session.execute(base_statement).scalars().all())
+
+        # Pagination
+        statement = base_statement.limit(limit).offset(offset)
+        result = session.execute(statement)
+        tracks = result.scalars().all()
+
+        # Convert to dictionaries
+        tracks_list = [{
+            'id': track.id,
+            'title': track.title,
+            'artist_name': track.artist_name,
+            'duration_seconds': track.duration_seconds,
+            'file_path': track.file_path,
+            'tags': [tag.name for tag in track.tags]
+        } for track in tracks]
+
+        # Return with pagination info
+        return jsonify({
+            'tracks': tracks_list,
+            'total': total_count,
+            'limit': limit,
+            'offset': offset,
+            'query': query
+        }), 200
     
 if __name__ == '__main__':
     app.run(debug=True)

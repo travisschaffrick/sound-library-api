@@ -44,3 +44,9 @@ This is a day by day progession of my project detailing the main things I did fr
 **Learnt**
 * How to use many to many relationships in SQLAlchemy
 
+## Day 4 (Slacked off for a while again (studied for midterms LOL))
+**Did**
+* Pagination added
+* Proper Searching added
+**Learnt**
+* How apis extract parameters from curl links

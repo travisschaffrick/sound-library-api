@@ -64,10 +64,10 @@ A REST API for managing a music/sound collection with metadata, tags, and search
 
 ### Milestone 7: Search & Pagination
 **Target: Day 8-9**
-- [ ] Add GET /api/tracks/search?q=query
-- [ ] Implement search by title, artist, or tags
-- [ ] Add pagination to GET /api/tracks (limit, offset)
-- [ ] Return metadata (total count, page info)
+- [x] Add GET /api/tracks/search?q=query
+- [x] Implement search by title, artist, or tags
+- [x] Add pagination to GET /api/tracks (limit, offset)
+- [x] Return metadata (total count, page info)
 - **Win:** Your API has useful querying capabilities and can handle large datasets
 
 ### Milestone 8: Testing
