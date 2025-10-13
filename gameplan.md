@@ -72,7 +72,7 @@ A REST API for managing a music/sound collection with metadata, tags, and search
 
 ### Milestone 8: Testing
 **Target: Day 10**
-- [ ] Install pytest and pytest-flask
+- [x] Install pytest and pytest-flask
 - [ ] Write 3-5 basic tests (create track, get track, 404 handling)
 - [ ] Write tests for tags, search, pagination
 - [ ] Aim for 10-15 total tests
