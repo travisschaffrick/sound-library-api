@@ -154,3 +154,103 @@ def test_delete_nonexistent_track(client):
     response = client.delete('/api/tracks/9999')
     
     assert response.status_code == 404
+
+
+
+def test_create_track_with_tags(client):
+    """Test POST /api/tracks - Create track with tags"""
+    response = client.post('/api/tracks', json={
+        'title': 'Hot Head',
+        'artist_name': 'Death Grips',
+        'duration_seconds': 200,
+        'file_path': '/music/hothead.mp3',
+        'tags': ['experimental', 'hip-hop']
+    })
+    
+    assert response.status_code == 201
+    data = response.get_json()
+    assert len(data['tags']) == 2
+    assert 'experimental' in data['tags']
+
+def test_get_all_tracks_empty(client):
+    """Test GET /api/tracks - Empty database"""
+    response = client.get('/api/tracks')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['total'] == 0
+
+def test_get_tracks_pagination(client):
+    """Test GET /api/tracks - Pagination"""
+    # Create 5 tracks
+    for i in range(5):
+        client.post('/api/tracks', json={
+            'title': f'Track {i}',
+            'artist_name': 'Artist',
+            'duration_seconds': 100,
+            'file_path': f'/music/track{i}.mp3'
+        })
+    
+    # Get first page (limit 2)
+    response = client.get('/api/tracks?limit=2&offset=0')
+    data = response.get_json()
+    assert data['total'] == 5
+    assert len(data['tracks']) == 2
+
+def test_update_track_with_tags(client):
+    """Test PUT /api/tracks/<id> - Update tags"""
+    create_response = client.post('/api/tracks', json={
+        'title': 'Song',
+        'artist_name': 'Artist',
+        'duration_seconds': 200,
+        'file_path': '/music/song.mp3',
+        'tags': ['old-tag']
+    })
+    track_id = create_response.get_json()['id']
+    
+    response = client.put(f'/api/tracks/{track_id}', json={
+        'tags': ['new-tag', 'another-tag']
+    })
+    
+    assert response.status_code == 200
+    data = response.get_json()
+    assert 'new-tag' in data['tags']
+    assert 'old-tag' not in data['tags']
+
+def test_search_by_title(client):
+    """Test GET /api/tracks/search - Search by title"""
+    client.post('/api/tracks', json={
+        'title': 'Hot Head',
+        'artist_name': 'Death Grips',
+        'duration_seconds': 200,
+        'file_path': '/music/hothead.mp3'
+    })
+    client.post('/api/tracks', json={
+        'title': 'Cold Feet',
+        'artist_name': 'Other',
+        'duration_seconds': 180,
+        'file_path': '/music/cold.mp3'
+    })
+    
+    response = client.get('/api/tracks/search?q=hot')
+    data = response.get_json()
+    assert data['total'] == 1
+    assert data['tracks'][0]['title'] == 'Hot Head'
+
+def test_search_by_tag(client):
+    """Test GET /api/tracks/search - Search by tag"""
+    client.post('/api/tracks', json={
+        'title': 'Song',
+        'artist_name': 'Artist',
+        'duration_seconds': 200,
+        'file_path': '/music/song.mp3',
+        'tags': ['experimental']
+    })
+    
+    response = client.get('/api/tracks/search?q=experimental')
+    data = response.get_json()
+    assert data['total'] == 1
+
+def test_search_no_query(client):
+    """Test GET /api/tracks/search - Missing query"""
+    response = client.get('/api/tracks/search')
+    assert response.status_code == 400

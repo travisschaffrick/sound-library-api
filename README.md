@@ -8,11 +8,9 @@ A REST API for managing audio files and their metadata. Supports creating, readi
 - SQLAlchemy (ORM)
 - pytest (testing)
 
-### Features (working)
+### Features
 - CRUD operations for audio tracks
 - RESTful API design
-
-### Features (planned)
 - Tag management (many-to-many relationships)
 - Search by title, artist, and tags
 - Pagination for large datasets
@@ -124,10 +122,10 @@ curl -X PUT http://localhost:5000/api/tracks/1 \
   "tags": ["experimental", "hip-hop"]
 }
 ```
-**Response: `404 Error`**
+**Response: `404 error`**
 ```json
 {
-  "Error": "Track not found"
+  "error": "Track not found"
 }
 ```
 
@@ -147,10 +145,10 @@ curl -X DELETE http://localhost:5000/api/tracks/1 \
   "Success": "Track 1: Known for it deleted"
 }
 ```
-**Response: `404 Error`**
+**Response: `404 error`**
 ```json
 {
-  "Error": "Track not found"
+  "error": "Track not found"
 }
 ```
 
@@ -175,10 +173,10 @@ curl -X GET http://localhost:5000/api/tracks/1 \
   "tags": ["experimental", "hip-hop"]
 }
 ```
-**Response: `404 Error`**
+**Response: `404 error`**
 ```json
 {
-  "Error": "Track not found"
+  "error": "Track not found"
 }
 ```
 
@@ -214,5 +212,105 @@ curl -X GET http://localhost:5000/api/tracks \
 ]
 ```
 
+#### 6. Search Tracks
+**GET** `/api/tracks/search`
 
-_Project in progress - building this to learn production-level backend development._
+Search for tracks by title, artist name, or tags.
+
+**Query Parameters:**
+- `q` (required) - Search query
+- `limit` (optional, default: 20) - Number of results per page
+- `offset` (optional, default: 0) - Starting position
+
+**Example:**
+```bash
+curl -X GET "http://localhost:5000/api/tracks/search?q=death&limit=10" \
+  -H "Content-Type: application/json"
+```
+
+**Response:** `200 OK`
+```json
+{
+  "tracks": [
+    {
+      "id": 1,
+      "title": "Beware",
+      "artist_name": "Death Grips",
+      "duration_seconds": 352,
+      "file_path": "/music/beware.mp3",
+      "tags": ["experimental", "hip-hop"]
+    }
+  ],
+  "total": 1,
+  "limit": 10,
+  "offset": 0,
+  "query": "death"
+}
+```
+
+**Error Response:** `400 Bad Request`
+```json
+{
+  "error": "Search query required"
+}
+```
+---
+
+## Running Tests
+
+The project includes comprehensive testing with pytest.
+
+**Run all tests:**
+```bash
+pytest
+```
+
+**Run with verbose output:**
+```bash
+pytest -v
+```
+
+**Run specific test file:**
+```bash
+pytest test/test_api.py
+```
+
+**Run with coverage report:**
+```bash
+pytest --cov=src
+```
+
+---
+
+
+## Project Structure
+```
+sound-library-api/
+├── src/
+│   ├── __init__.py
+│   ├── app.py          # Flask application and routes
+│   └── models.py       # SQLAlchemy models
+├── test/
+│   ├── __init__.py
+│   ├── conftest.py     # pytest fixtures
+│   └── test_api.py     # API tests
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+## What I Learned
+
+Building this project taught me:
+
+- **RESTful API Design:** Proper HTTP methods, status codes, and endpoint structure
+- **SQLAlchemy ORM:** Database relationships, especially many-to-many with association tables
+- **Flask Framework:** Request handling, JSON responses, and application factory pattern
+- **Testing:** Writing comprehensive integration tests with pytest and fixtures
+- **Input Validation:** Handling edge cases and providing meaningful error messages
+- **Pagination:** Implementing efficient pagination for large datasets
+- **Search Functionality:** Building flexible search across multiple fields and relationships
+
+---
+
+_Building this project to learn production-level backend development and prepare for backend engineering roles._
