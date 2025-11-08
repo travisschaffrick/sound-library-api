@@ -2,13 +2,19 @@ from flask import Flask, jsonify, request
 from src.models import Base, Track, Tag, track_tags
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
+import os
 
-# Get password
-with open("sqlalchemy_password.txt") as f:
-    password = f.readline().strip()
+def get_db_url():
+    if os.getenv('TESTING'):
+        return "sqlite:///:memory:"
+    else:
+        with open("sqlalchemy_password.txt") as f:
+            password = f.readline().strip()
+        return f"postgresql://postgres:{password}@localhost/sound_library"
+
 
 # Create Database and tables
-engine = create_engine(f"postgresql://postgres:{password}@localhost/sound_library")
+engine = create_engine(get_db_url())
 Base.metadata.create_all(engine)
 
 
@@ -20,19 +26,19 @@ def handle_tracks():
         data = request.get_json()
         # Input validation
         if 'title' not in data or not data['title']:
-            return jsonify({"Error": "No title"}), 400
+            return jsonify({"error": "No title"}), 400
         
         if 'artist_name' not in data or not data['artist_name']:
-            return jsonify({"Error": "No artist name"}), 400
+            return jsonify({"error": "No artist name"}), 400
         
         if 'duration_seconds' not in data:
-            return jsonify({"Error": "Duration is required"}), 400
+            return jsonify({"error": "Duration is required"}), 400
         # Check type and value
         if not isinstance(data['duration_seconds'], int) or data['duration_seconds'] <= 0:
-            return jsonify({"Error": "Duration must be a positive integer"}), 400
+            return jsonify({"error": "Duration must be a positive integer"}), 400
 
         if 'file_path' not in data or not data['file_path']:
-            return jsonify({"Error": "No file path"}), 400
+            return jsonify({"error": "No file path"}), 400
         
         song_tags = []
 
@@ -98,14 +104,64 @@ def handle_tracks():
             # Return with pagination info
             return jsonify({
                 'tracks': tracks_list,
-                'total': total_count,
+                'total': track_count,
                 'limit': limit,
                 'offset': offset
             }), 200
     
     return jsonify("Invalid request"), 400
     
+
+@app.route('/api/tracks/search', methods=['GET'])
+def search_tracks():
+    query = request.args.get('q', '')
+
+    if not query:
+        return jsonify({"error": "Search query required"}), 400
+
+    # Get pagination parameters
+    limit = request.args.get('limit', 20, type=int)
+    offset = request.args.get('offset', 0, type=int)
     
+    
+    with Session(engine) as session:
+        search_pattern = f'%{query}%'
+
+        # Search using track title, artist name, and track tags
+        base_statement = select(Track).join(Track.tags, isouter=True).where(
+            (Track.title.ilike(search_pattern)) |
+            (Track.artist_name.ilike(search_pattern)) |
+            (Tag.name.ilike(search_pattern))
+        ).distinct()
+
+        # Get total count
+        total_count = len(session.execute(base_statement).scalars().all())
+
+        # Pagination
+        statement = base_statement.limit(limit).offset(offset)
+        result = session.execute(statement)
+        tracks = result.scalars().all()
+
+        # Convert to dictionaries
+        tracks_list = [{
+            'id': track.id,
+            'title': track.title,
+            'artist_name': track.artist_name,
+            'duration_seconds': track.duration_seconds,
+            'file_path': track.file_path,
+            'tags': [tag.name for tag in track.tags]
+        } for track in tracks]
+
+        # Return with pagination info
+        return jsonify({
+            'tracks': tracks_list,
+            'total': total_count,
+            'limit': limit,
+            'offset': offset,
+            'query': query
+        }), 200
+    
+
 @app.route('/api/tracks/<id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_track_by_id(id):
     # GET
@@ -117,7 +173,7 @@ def handle_track_by_id(id):
             track = result.scalar_one_or_none()
 
             if not track:
-                return jsonify({"Error": "Track not found"}), 404
+                return jsonify({"error": "Track not found"}), 404
             
             # Convert to dictionary
             tracks_list = {
@@ -140,7 +196,7 @@ def handle_track_by_id(id):
             track = result.scalar_one_or_none()
 
             if not track:
-                return jsonify({"Error": "Track not found"}), 404
+                return jsonify({"error": "Track not found"}), 404
             
             # update only what is given
             if 'title' in data and data['title']:
@@ -190,59 +246,11 @@ def handle_track_by_id(id):
                 session.commit()
                 return jsonify({"Success": f"Track {id}: {track.title} deleted"}), 200
             else:
-                return jsonify({"Error": "Track not found"}), 404
+                return jsonify({"error": "Track not found"}), 404
         
         
     return jsonify("Invalid request"), 400
 
-@app.route('/api/tracks/search', methods=['GET'])
-def search_tracks():
-    query = request.args.get('q', '')
 
-    if not query:
-        return jsonify({"Error": "Search query required"}), 400
-
-    # Get pagination parameters
-    limit = request.args.get('limit', 20, type=int)
-    offset = request.args.get('offset', 0, type=int)
-    
-    
-    with Session(engine) as session:
-        search_pattern = f'%{query}%'
-
-        # Search using track title, artist name, and track tags
-        base_statement = select(Track).join(Track.tags).where(
-            (Track.title.ilike(search_pattern)) |
-            (Track.artist_name.ilike(search_pattern)) |
-            (Tag.name.ilike(search_pattern))
-        ).distinct()
-
-        # Get total count
-        total_count = len(session.execute(base_statement).scalars().all())
-
-        # Pagination
-        statement = base_statement.limit(limit).offset(offset)
-        result = session.execute(statement)
-        tracks = result.scalars().all()
-
-        # Convert to dictionaries
-        tracks_list = [{
-            'id': track.id,
-            'title': track.title,
-            'artist_name': track.artist_name,
-            'duration_seconds': track.duration_seconds,
-            'file_path': track.file_path,
-            'tags': [tag.name for tag in track.tags]
-        } for track in tracks]
-
-        # Return with pagination info
-        return jsonify({
-            'tracks': tracks_list,
-            'total': total_count,
-            'limit': limit,
-            'offset': offset,
-            'query': query
-        }), 200
-    
 if __name__ == '__main__':
     app.run(debug=True)
